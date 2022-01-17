@@ -1,0 +1,28 @@
+ECommerceLiteSolution
+ECommerceLiteUI
+ECommerceLiteEntity
+ECommerceLiteDAL
+ECommerceLiteBLL
+
+References
+UI reference BLL and Entity
+BLL reference Entity and DAL
+DAL reference Entity
+
+--all--
+install-package Entityframework
+install-package Microsoft.aspnet.Identity.core
+install-package Microsoft.aspnet.Identity.EntityFramework
+install-package Newtonsoft.Json
+install-package Microsoft.aspnet.Identity.Owin
+
+--only UI--
+install-package Microsoft.Owin
+install-package Microsoft.Owin.Security
+install-package Microsoft.Owin.Security.Cookies
+install-package Microsoft.Owin.Security.OAuth
+install-package Microsoft.Owin.Host.SystemWeb
+
+enable-migrations
+add-migration InitializeDB
+update-database
