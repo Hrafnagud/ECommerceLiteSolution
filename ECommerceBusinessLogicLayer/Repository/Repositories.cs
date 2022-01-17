@@ -19,4 +19,6 @@ namespace ECommerceBusinessLogicLayer.Repository
     public class CustomerRepo : RepositoryBase<Customer, string> { }
     public class AdminRepo : RepositoryBase<Admin, string> { }
     public class PassiveUserRepo : RepositoryBase<PassiveUser, string> { }
+
+    //Same amount of elements in context
 }
