@@ -237,5 +237,57 @@ namespace ECommerceLiteUI.Controllers
                 return View(model);
             }
         }
+
+        [HttpGet]
+        [Authorize]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UpdatePassword(ProfileViewModel model)
+        {
+            try
+            {
+                if (model.NewPassword != model.ConfirmNewPassword)
+                {
+                    ModelState.AddModelError(null, "Passwords doesn't match!");
+                    return View(model);
+                }
+                var user = userManager.FindById(HttpContext.User.Identity.GetUserId());
+                var userValidation = userManager.Find(user.UserName, model.OldPassword);
+
+                if (userValidation == null)
+                {
+                    ModelState.AddModelError(null, "Wrong authentication entry!");
+                    return View();
+                }
+
+                await userStore.SetPasswordHashAsync(user, userManager.PasswordHasher.HashPassword(model.NewPassword));
+                await userStore.UpdateAsync(user);
+                await userStore.Context.SaveChangesAsync();
+                TempData["PasswordUpdated"] = "Password has been successfully changed!";
+                HttpContext.GetOwinContext().Authentication.SignOut();
+                return RedirectToAction("Login", "Account", new {email = user.Email });
+
+            }
+            catch (Exception ex)
+            {
+                //Todo log ex
+                ModelState.AddModelError(null, "Unexpected error has occured!");
+                return View(model);
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public ActionResult UserProfile()
+        {
+            var user = userManager.FindById(HttpContext.User.Identity.GetUserId());
+            var model = new ProfileViewModel()
+            {
+                Email = user.Email,
+                Name = user.Name,
+                Surname = user.Surname,
+                Username = user.UserName
+            };
+            return View(model);
+        }
     }
 }
