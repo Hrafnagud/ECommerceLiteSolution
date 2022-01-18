@@ -106,23 +106,33 @@ namespace ECommerceLiteUI.Controllers
         [HttpGet]
         public async Task<ActionResult> Activation(string code)
         {
-            var userStore = MembershipTools.NewUserStore();
-            var result = userStore.Context.Set<ApplicationUser>().FirstOrDefault(x => x.ActivationCode == code);
-            if (result == null)
+            try
             {
-                ViewBag.Result = "Activation failed!";
+                var userStore = MembershipTools.NewUserStore();
+                var theResult = userStore.Context.Set<ApplicationUser>().FirstOrDefault(x => x.ActivationCode == code);
+                if (theResult == null)
+                {
+                    ViewBag.ActivationResult = "Activation failed!";
+                    return View();
+                }
+
+                if (theResult.EmailConfirmed)
+                {
+                    ViewBag.ActivationResult = "Mail address has been confirmed!";
+                    return View();
+                }
+                theResult.EmailConfirmed = true;
+                await userStore.UpdateAsync(theResult);
+                await userStore.Context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                //TODO: ex Loglama
+                ModelState.AddModelError("", "Unexpected error has occured!");
                 return View();
             }
-
-            if (result.EmailConfirmed)
-            {
-                ViewBag.Result = "Your activation has been confirmed!";
-                return View();
-            }
-            result.EmailConfirmed = true;
-            await userStore.UpdateAsync(result);
-            await userStore.Context.SaveChangesAsync();
-
         }
+
     }
 }
