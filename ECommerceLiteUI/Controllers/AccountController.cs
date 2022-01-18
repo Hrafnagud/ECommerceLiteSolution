@@ -6,6 +6,9 @@ using ECommerceLiteEntity.IdentityModels;
 using ECommerceLiteEntity.Models;
 using ECommerceLiteEntity.ViewModels;
 using ECommerceLiteUI.Models;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
+using Microsoft.Owin.Security;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +21,11 @@ namespace ECommerceLiteUI.Controllers
     public class AccountController : BaseController
     {
         //Removed Index method that comes with AccountController
+        CustomerRepo customerRepo = new CustomerRepo();
         PassiveUserRepo passiveUserRepo = new PassiveUserRepo();
+        UserManager<ApplicationUser> userManager = MembershipTools.NewUserManager();
+        UserStore<ApplicationUser> userStore = MembershipTools.NewUserStore();
+        RoleManager<ApplicationRole> roleManager = MembershipTools.NewRoleManager();
 
 
         [HttpGet]
@@ -37,8 +44,6 @@ namespace ECommerceLiteUI.Controllers
                 {
                     return View(model);
                 }
-                var userManager = MembershipTools.NewUserManager();
-                var userStore = MembershipTools.NewUserStore();
                 var checkUserTRID = userStore.Context.Set<Customer>().FirstOrDefault(x => x.TRID == model.TRID)?.TRID;
 
                 if (checkUserTRID != null)
@@ -108,22 +113,44 @@ namespace ECommerceLiteUI.Controllers
         {
             try
             {
-                var userStore = MembershipTools.NewUserStore();
-                var theResult = userStore.Context.Set<ApplicationUser>().FirstOrDefault(x => x.ActivationCode == code);
-                if (theResult == null)
+                var user = userStore.Context.Set<ApplicationUser>().FirstOrDefault(x => x.ActivationCode == code);
+                if (user == null)
                 {
                     ViewBag.ActivationResult = "Activation failed!";
                     return View();
                 }
 
-                if (theResult.EmailConfirmed)
+                if (user.EmailConfirmed)
                 {
-                    ViewBag.ActivationResult = "Mail address has been confirmed!";
+                    ViewBag.ActivationResult = "Mail address has already been confirmed!";
                     return View();
                 }
-                theResult.EmailConfirmed = true;
-                await userStore.UpdateAsync(theResult);
+                user.EmailConfirmed = true;
+                await userStore.UpdateAsync(user);
                 await userStore.Context.SaveChangesAsync();
+
+                PassiveUser passiveUser = passiveUserRepo.Queryable().FirstOrDefault(x => x.UserId == user.Id);
+                if (passiveUser != null)
+                {
+                    if (passiveUser.TargetRole == IdentityRoles.Customer)
+                    {
+                        //new customer to be created and saved. Then User's passive role will be removed and customer role will be added.
+                        Customer newCustomer = new Customer()
+                        {
+                            TRID = passiveUser.TRID,
+                            UserId = user.Id,
+                        };
+                        customerRepo.Insert(newCustomer);
+                        //Now customer is not a passive user. So record can be removed from the passive table.
+                        passiveUserRepo.Delete(passiveUser);
+                        //Adding customer role
+                        userManager.RemoveFromRole(user.Id, IdentityRoles.Passive.ToString());
+                        userManager.AddToRole(user.Id, IdentityRoles.Customer.ToString());
+                        ViewBag.ActivationResult = $"Hello {user.Name} {user.Surname}, Activation process had been successfuly done!";
+                        return View();
+                    }
+                }
+                return View();
             }
             catch (Exception ex)
             {
@@ -134,5 +161,81 @@ namespace ECommerceLiteUI.Controllers
             }
         }
 
+        [HttpGet]
+        public ActionResult Login(string ReturnUrl, string email)
+        {
+            try
+            {
+                if (HttpContext.User.Identity.IsAuthenticated)
+                {
+                    var url = ReturnUrl.Split('/');
+                }
+                var model = new LoginViewModel()
+                {
+                    ReturnUrl = ReturnUrl
+                };
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                //log ex
+                return View();
+            }
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Login(LoginViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid) {
+                    return View(model);
+                }
+
+                var user = await userManager.FindAsync(model.Email, model.Password);
+                if (user == null)
+                {
+                    ModelState.AddModelError(string.Empty, "Make sure you entered email and password correctly.");
+                    return View(model);
+                }
+                if (user.Roles.FirstOrDefault().RoleId == roleManager.FindByName(Enum.GetName(typeof(IdentityRoles), IdentityRoles.Passive )).Id)
+                {
+                    ViewBag.Result = "Sistemi kullanabilmeniz için üyeliğinizi aktifleştirmeniz gerekmektedir. Emailinize gönderilen aktivasyon linkine tıklayarak aktifleştirme işlemini yapabilirsiniz. ";
+                    return View(model);
+                }
+                var authManager = HttpContext.GetOwinContext().Authentication;
+                var userIdentity = await userManager.CreateIdentityAsync(user, DefaultAuthenticationTypes.ApplicationCookie);
+                authManager.SignIn(new AuthenticationProperties
+                {
+                    IsPersistent = model.RememberMe
+                }, userIdentity);
+                if (user.Roles.FirstOrDefault().RoleId == roleManager.FindByName(Enum.GetName(typeof(IdentityRoles), IdentityRoles.Admin)).Id)
+                {
+                    return RedirectToAction("Index", "Admin");
+
+                }
+                if (user.Roles.FirstOrDefault().RoleId == roleManager.FindByName(Enum.GetName(typeof(IdentityRoles), IdentityRoles.Customer)).Id)
+                {
+                    return RedirectToAction("Index", "Home");
+
+                }
+
+                if (string.IsNullOrEmpty(model.ReturnUrl))
+                    return RedirectToAction("Index", "Home");
+
+                var url = model.ReturnUrl.Split('/');
+                if (url.Length == 4)
+                    return RedirectToAction(url[2], url[1], new { id = url[3] });
+                else
+                    return RedirectToAction(url[2], url[1]);
+            }
+            catch (Exception ex)
+            {
+                //Todo log ex
+                ModelState.AddModelError(null, "Unexpected error has occured!");
+                return View(model);
+            }
+        }
     }
 }
