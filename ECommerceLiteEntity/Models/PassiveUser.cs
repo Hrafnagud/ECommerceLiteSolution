@@ -1,4 +1,5 @@
-﻿using ECommerceLiteEntity.IdentityModels;
+﻿using ECommerceLiteEntity.Enums;
+using ECommerceLiteEntity.IdentityModels;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -11,6 +12,7 @@ namespace ECommerceLiteEntity.Models
     [Table("PassiveUsers")]
     public class PassiveUser : PersonBase
     {
+        public IdentityRoles TargetRole { get; set; }
         public string UserId { get; set; }
         [ForeignKey("UserId")]
 
