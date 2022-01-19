@@ -289,5 +289,91 @@ namespace ECommerceLiteUI.Controllers
             };
             return View(model);
         }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> UserProfile(ProfileViewModel model)
+        {
+            try
+            {
+                var user = userManager.FindById(HttpContext.User.Identity.GetUserId());
+                if (user == null)
+                {
+                    ModelState.AddModelError("","Operation can't proceed. No user found!");
+                    return View(model);
+                }
+
+                user.Name = model.Name;
+                user.Surname = model.Surname;
+                //Todo: Phone number can be added.
+                await userStore.UpdateAsync(user);
+                await userStore.Context.SaveChangesAsync();
+                ViewBag.Result = "Your information details have been successfully updated!";
+                var newModel = new ProfileViewModel()
+                {
+                    Email = user.Email,
+                    Name = user.Name,
+                    Surname = user.Surname,
+                    Username = user.UserName
+                };
+                return View(newModel);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError(null, "Unexpected error has occured: " + ex.Message);
+                return View(model);
+               //TODO: ex loglanacak
+            }
+        }
+
+        [HttpGet]
+        public ActionResult RecoverPassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> RecoverPassword(ProfileViewModel model)
+        {
+            try
+            {
+                var user = userStore.Context.Set<ApplicationUser>().FirstOrDefault(x => x.Email == model.Email);
+                if (user == null)
+                {
+                    ViewBag.Result = "Can't recover password since no such user can be found. Plase register first!";
+                    return View(model);
+                }
+
+                var randomPassword = GenerateNewRandomPassword();
+                await userStore.SetPasswordHashAsync(user, userManager.PasswordHasher.HashPassword(randomPassword));
+                await userStore.UpdateAsync(user);
+                string siteUrl = Request.Url.Scheme + Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port);
+                await SiteSettings.SendMail(new MailModel()
+                {
+                    To = user.Email,
+                    Subject = "EcommerceLite Site - Your password has been changed!",
+                    Message = $"Hello {user.Name} {user.Surname} <br/>Your new password:<b>{randomPassword}</b>" +
+                    $"In order to login click <b><a href='{siteUrl}/Account/Login?email={user.Email}'>here</a></b>."
+                });
+                ViewBag.Result = "Your new password has been sent to your Email";
+                return View();
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Resul("System based error has occured. Please try again");
+                return View(model);
+                //Todo log ex
+            }
+        }
+
+        [HttpGet]
+        [Authorize]
+        public ActionResult Logout()
+        {
+            HttpContext.GetOwinContext().Authentication.SignOut();
+            return RedirectToAction("Login", "Account");
+        }
     }
 }
