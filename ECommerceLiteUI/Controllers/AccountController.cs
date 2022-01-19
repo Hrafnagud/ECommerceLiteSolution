@@ -66,7 +66,9 @@ namespace ECommerceLiteUI.Controllers
                     Name = model.Name,
                     Surname = model.Surname,
                     Email = model.Email,
-                    ActivationCode = activationCode
+                    ActivationCode = activationCode,
+                    UserName = model.Email,
+                    PhoneNumber = "05555555555"
                 };
                 var theResult = userManager.CreateAsync(newUser, model.Password);
                 if (theResult.Result.Succeeded)
