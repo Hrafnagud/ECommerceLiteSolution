@@ -1,0 +1,64 @@
+﻿@using ECommerceLiteUI.Models
+@model RegisterViewModel
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+
+<h2>Register</h2>
+
+<div class="row margin-vert-30">
+    <!--Register-->
+    <div class="col-md-6 col-md-offset-3 col-sm-offset-3">
+        <span class="text-danger">@Html.ValidationSummary()</span>
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "form-horizontal" }))
+        {
+            @Html.AntiForgeryToken()
+            <div class="signup-header" align="center">
+                <h2>You can register now!</h2>
+                <p>
+                    Already a member?
+                    <a href="@Url.Action("Login","Account")">Click</a> to login.
+                </p>
+            </div>
+            <hr />
+            <label>@Html.DisplayNameFor(x => x.TRID)</label>
+            @Html.TextBoxFor(x => x.TRID, new { @class = "form-control margin-bottom-10" })<br />
+            <label>Your Name</label>
+            @Html.TextBoxFor(x => x.Name, new { @class = "form-control margin-bottom-10" })<br />
+            <label>Your Surname</label>
+            @Html.TextBoxFor(x => x.Surname, new { @class = "form-control margin-bottom-10" })<br />
+            <label>
+                Email Address
+                <span class="color-red">*</span>
+            </label>
+            @Html.TextBoxFor(x => x.Email, new { @class = "form-control margin-bottom-10", type = "email" })<br />
+
+            <!-------->
+            <div class="row">
+                <div class="col-sm-6">
+                    <label>
+                        Password
+                        <span class="color-red">*</span>
+                    </label>
+                    @Html.TextBoxFor(x => x.Password, new { @class = "form-control margin-bottom-10", type = "password" })<br />
+                    <span class="text-danger">  @Html.ValidationMessageFor(x => x.Password) </span>
+                </div>
+                <div class="col-sm-6">
+                    <label>
+                        Password repeat
+                        <span class="color-red">*</span>
+                    </label>
+                    @Html.TextBoxFor(x => x.ConfirmPassword, new { @class = "form-control margin-bottom-10", type = "password" })<br />
+                    <span class="text-danger">@Html.ValidationMessageFor(x => x.ConfirmPassword)</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-offset-9">
+                    <button type="submit" class="btn btn-info btn-lg">Register!</button>
+                </div>
+            </div>
+        }
+    </div>
+    <!--Register-->
+</div>

@@ -238,7 +238,14 @@ namespace ECommerceLiteUI.Controllers
             }
         }
 
+
         [HttpGet]
+        public ActionResult UpdatePassword()
+        {
+            return View();
+        }
+
+        [HttpPost]
         [Authorize]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> UpdatePassword(ProfileViewModel model)
@@ -362,7 +369,7 @@ namespace ECommerceLiteUI.Controllers
             }
             catch (Exception ex)
             {
-                ViewBag.Resul("System based error has occured. Please try again");
+                ViewBag.Result("System based error has occured. Please try again");
                 return View(model);
                 //Todo log ex
             }
