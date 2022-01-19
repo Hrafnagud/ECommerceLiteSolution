@@ -11,8 +11,8 @@ namespace ECommerceBusinessLogicLayer.Settings
 {
     public static class SiteSettings
     {
-        public static string SiteMail { get; set; } = "";
-        public static string SiteMailPasssword { get; set; } = "";
+        public static string SiteMail { get; set; } = "yazilim103@gmail.com";
+        public static string SiteMailPasssword { get; set; } = "betulaksan103";
 
         public static string SiteMailSmtpHost = "smtp.gmail.com";
 
