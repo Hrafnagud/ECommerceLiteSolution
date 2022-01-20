@@ -48,7 +48,7 @@ namespace ECommerceLiteUI.Controllers
 
                 if (checkUserTRID != null)
                 {
-                    ModelState.AddModelError(null, "This TRID has already been registered to the system!");
+                    ModelState.AddModelError("", "This TRID has already been registered to the system!");
                     return View(model);
                 }
 
@@ -56,7 +56,7 @@ namespace ECommerceLiteUI.Controllers
 
                 if (checkUserEmail != null)
                 {
-                    ModelState.AddModelError(null, "This Email has already been registered to the system!");
+                    ModelState.AddModelError("", "This Email has already been registered to the system!");
                     return View(model);
                 }
 
@@ -80,7 +80,8 @@ namespace ECommerceLiteUI.Controllers
                     {
                         TRID = model.TRID,
                         UserId = newUser.Id,
-                        TargetRole = IdentityRoles.Customer
+                        TargetRole = IdentityRoles.Customer,
+                        LastActiveTime = DateTime.Now
                     };
                     passiveUserRepo.Insert(newPassiveUser);
 
@@ -97,7 +98,7 @@ namespace ECommerceLiteUI.Controllers
 
                 else
                 {
-                    ModelState.AddModelError(null, "Something went wrong! Good luck debugging an asynchronous method!");
+                    ModelState.AddModelError("", "Something went wrong! Good luck debugging an asynchronous method!");
                     return View(model);
                 }
 
@@ -105,7 +106,7 @@ namespace ECommerceLiteUI.Controllers
             catch (Exception ex)
             {
                 //TODO: Log ex
-                ModelState.AddModelError(null, "Something went wrong! Good luck debugging an asynchronous method!");
+                ModelState.AddModelError("", "Something went wrong! Good luck debugging an asynchronous method!");
                 return View(model);
             }
         }
@@ -141,6 +142,7 @@ namespace ECommerceLiteUI.Controllers
                         {
                             TRID = passiveUser.TRID,
                             UserId = user.Id,
+                            LastActiveTime = DateTime.Now
                         };
                         customerRepo.Insert(newCustomer);
                         //Now customer is not a passive user. So record can be removed from the passive table.
@@ -168,9 +170,9 @@ namespace ECommerceLiteUI.Controllers
         {
             try
             {
-                if (HttpContext.User.Identity.IsAuthenticated)
+                if (HttpContext.User.Identity.IsAuthenticated && ReturnUrl!=null)
                 {
-                    var url = ReturnUrl.Split('/');
+                    var url =   ReturnUrl.Split('/');
                 }
                 var model = new LoginViewModel()
                 {
@@ -235,7 +237,7 @@ namespace ECommerceLiteUI.Controllers
             catch (Exception ex)
             {
                 //Todo log ex
-                ModelState.AddModelError(null, "Unexpected error has occured!");
+                ModelState.AddModelError("", "Unexpected error has occured!");
                 return View(model);
             }
         }
@@ -244,6 +246,18 @@ namespace ECommerceLiteUI.Controllers
         [HttpGet]
         public ActionResult UpdatePassword()
         {
+            var user = userManager.FindById(HttpContext.User.Identity.GetUserId());
+            if (user != null)
+            {
+                ProfileViewModel model = new ProfileViewModel()
+                {
+                    Name = user.Name,
+                    Surname = user.Surname,
+                    Email = user.Email,
+                    Username = user.UserName
+                };
+                return View(model);
+            }
             return View();
         }
 
@@ -256,21 +270,20 @@ namespace ECommerceLiteUI.Controllers
             {
                 if (model.NewPassword != model.ConfirmNewPassword)
                 {
-                    ModelState.AddModelError(null, "Passwords doesn't match!");
+                    ModelState.AddModelError("", "Passwords doesn't match!");
                     return View(model);
                 }
                 var user = userManager.FindById(HttpContext.User.Identity.GetUserId());
-                var userValidation = userManager.Find(user.UserName, model.OldPassword);
+                var userValidation = userManager.Find(user.UserName, model.CurrentPassword);
 
                 if (userValidation == null)
                 {
-                    ModelState.AddModelError(null, "Wrong authentication entry!");
+                    ModelState.AddModelError("", "Wrong authentication entry!");
                     return View();
                 }
 
                 await userStore.SetPasswordHashAsync(user, userManager.PasswordHasher.HashPassword(model.NewPassword));
-                await userStore.UpdateAsync(user);
-                await userStore.Context.SaveChangesAsync();
+                await userManager.UpdateAsync(user);
                 TempData["PasswordUpdated"] = "Password has been successfully changed!";
                 HttpContext.GetOwinContext().Authentication.SignOut();
                 return RedirectToAction("Login", "Account", new {email = user.Email });
@@ -279,7 +292,7 @@ namespace ECommerceLiteUI.Controllers
             catch (Exception ex)
             {
                 //Todo log ex
-                ModelState.AddModelError(null, "Unexpected error has occured!");
+                ModelState.AddModelError("", "Unexpected error has occured!");
                 return View(model);
             }
         }
@@ -312,12 +325,14 @@ namespace ECommerceLiteUI.Controllers
                     ModelState.AddModelError("","Operation can't proceed. No user found!");
                     return View(model);
                 }
-
+                if (userManager.PasswordHasher.VerifyHashedPassword(user.PasswordHash, model.CurrentPassword) == PasswordVerificationResult.Failed)
+                {
+                    ModelState.AddModelError("", "Update can't be performed. Current password is wrong.");
+                }
                 user.Name = model.Name;
                 user.Surname = model.Surname;
                 //Todo: Phone number can be added.
-                await userStore.UpdateAsync(user);
-                await userStore.Context.SaveChangesAsync();
+                await userManager.UpdateAsync(user);
                 ViewBag.Result = "Your information details have been successfully updated!";
                 var newModel = new ProfileViewModel()
                 {
@@ -330,7 +345,7 @@ namespace ECommerceLiteUI.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError(null, "Unexpected error has occured: " + ex.Message);
+                ModelState.AddModelError("", "Unexpected error has occured: " + ex.Message);
                 return View(model);
                //TODO: ex loglanacak
             }
