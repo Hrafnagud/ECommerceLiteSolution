@@ -6,11 +6,9 @@
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
-<h2>All Categories</h2>
-
 <div class="card">
     <div class="card-header">
-        <h3 class="card-title">Category List</h3>
+        <a href="/Category/Create" class="btn btn-info btn-sm">Add New Category</a>
     </div>
     <!-- /.card-header -->
     <div class="card-body">
@@ -23,7 +21,6 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
                     @foreach (var item in Model)
                     {
                         <tr>
@@ -32,12 +29,10 @@
                             <td>
                                 <a href="/Category/Edit/@item.Id" class="btn btn-sm btn-warning" style="margin-right:5px;">Edit</a>
                                 <a href="/Category/Delete/@item.Id" class="btn btn-sm btn-danger" style="margin-right: 5px;">Delete</a>
-                                <a href="/Category/ProductsList/@item.Id" class="btn btn-sm btn-info" style="margin-right: 5px;">Sub Categories
-                                </a>
+                                <a href="/Category/SubCategoryList/@item.Id" class="btn btn-sm btn-info" style="margin-right: 5px;">Sub Categories</a>
                             </td>
                         </tr>
                     }
-                </tr>
             </tbody>
             <tfoot>
                 <tr>
