@@ -10,7 +10,30 @@
     @Html.AntiForgeryToken()
 
     <div class="form-horizontal col-6 offset-3">
-        <h4>Add New Category</h4>
+
+
+        @*@{ 
+            if (TempData["CurrentWindow"] == "base")
+            {
+                <h4>Add New Category</h4>
+            }
+            else if (TempData["CurrentWindow"] == "sub")
+            {
+                <h4>Add Subcategory for @ViewBag.CategoryName</h4>
+            }*@
+
+
+
+        @{ //Betul's alternative
+            if (string.IsNullOrEmpty(ViewBag.CategoryName))
+            {
+                <h4>Add New Category</h4>
+            }
+            else
+            {
+                <h4>Add new Subcategory for <span style="color:red">@ViewBag.CategoryName</span></h4>
+            }
+        }
         <hr />
         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
 

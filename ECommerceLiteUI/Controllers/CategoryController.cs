@@ -16,17 +16,21 @@ namespace ECommerceLiteUI.Controllers
         {
             var allCategories = categoryRepo.Queryable().Where(x => x.BaseCategoryId == null).ToList();
             ViewBag.CategoryCount = allCategories.Count;
+            TempData["CurrentWindow"] = "base";
             return View(allCategories);
         }
 
-        public ActionResult Create(int? id)
+        public ActionResult Create(int? id, bool IsSendFromSubCategory = false)
         {
+            ViewBag.CategoryName = string.Empty;    //Betul's alternative
             if (id != null)
             {
+
                 Category model = new Category()
                 {
                     Id = id.Value
                 };
+                ViewBag.CategoryName= categoryRepo.GetById(id.Value).CategoryName;
                 return View(model);
             }
             return View();
@@ -65,8 +69,7 @@ namespace ECommerceLiteUI.Controllers
                 }
                 else if (insertResult > 0 && model.Id > 0)
                 {
-                    return RedirectToAction("SubCategoryList", "Category");
-
+                    return RedirectToAction("SubCategoryList", "Category", new { id = model.Id });
                 }
                 else
                 {
@@ -86,6 +89,7 @@ namespace ECommerceLiteUI.Controllers
             ViewBag.CategoryId = id;
             ViewBag.CategoryName = categoryRepo.GetById(id).CategoryName;
             ViewBag.SubCategoryCount = subCategories.Count;
+            TempData["CurrentWindow"] = "sub";
             return View(subCategories);
         }
     }
