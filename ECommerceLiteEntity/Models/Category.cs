@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace ECommerceLiteEntity.Models
 {
-    [Table("Category")]
+    [Table("Categories")]
     public class Category : TheBase<int> 
     {
         [Required]
@@ -18,7 +18,7 @@ namespace ECommerceLiteEntity.Models
         [StringLength(500, ErrorMessage = "Category Desctipyion can containt utmost 500 characters")]
         public string CategoryDescription { get; set; }
 
-        public int BaseCategoryId { get; set; }
+        public int? BaseCategoryId { get; set; }
         [ForeignKey("BaseCategoryId")]
         public virtual Category BaseCategory{ get; set; }
         public virtual List<Product> ProductList { get; set; }
