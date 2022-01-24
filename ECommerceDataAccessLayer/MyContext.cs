@@ -24,6 +24,7 @@ namespace ECommerceDataAccessLayer
         public virtual DbSet<Product> Products{ get; set; }
         public virtual DbSet<Order> Orders{ get; set; }
         public virtual DbSet<OrderDetail> OrderDetails{ get; set; }
+        public virtual DbSet<ProductPicture> ProductPictures { get; set; }
 
 
     }
