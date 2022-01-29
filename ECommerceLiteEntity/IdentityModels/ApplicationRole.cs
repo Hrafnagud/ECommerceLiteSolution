@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 
 namespace ECommerceLiteEntity.IdentityModels
 {
-    public class ApplicationRole : IdentityRole
+    public class ApplicationRole : IdentityRole //To create AspnetRoles table in DB, inherit IdentityRole
     {
         [StringLength(200)]
-        public string Desctiption { get; set; }
+        public string Description { get; set; }
     }
 }

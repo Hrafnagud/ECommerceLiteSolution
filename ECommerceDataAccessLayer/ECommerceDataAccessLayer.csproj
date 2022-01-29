@@ -101,6 +101,10 @@
     <Compile Include="Migrations\202201240736546_ProductPictureTableEdit.Designer.cs">
       <DependentUpon>202201240736546_ProductPictureTableEdit.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202201250813210_ApplicationRoleDescription.cs" />
+    <Compile Include="Migrations\202201250813210_ApplicationRoleDescription.Designer.cs">
+      <DependentUpon>202201250813210_ApplicationRoleDescription.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
     <Compile Include="MyContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -133,6 +137,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202201240736546_ProductPictureTableEdit.resx">
       <DependentUpon>202201240736546_ProductPictureTableEdit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202201250813210_ApplicationRoleDescription.resx">
+      <DependentUpon>202201250813210_ApplicationRoleDescription.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

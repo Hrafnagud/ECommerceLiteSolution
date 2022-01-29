@@ -105,7 +105,7 @@ namespace ECommerceLiteUI.Controllers
             }
             catch (Exception ex)
             {
-                //TODO: Log ex
+                //TODO: Log ex will be performed
                 ModelState.AddModelError("", "Something went wrong! Good luck debugging an asynchronous method!");
                 return View(model);
             }

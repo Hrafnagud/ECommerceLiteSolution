@@ -15,7 +15,7 @@ namespace ECommerceLiteEntity.Models
         [StringLength(50, MinimumLength = 2, ErrorMessage = "Category name must containg 2-50 characters")]
         public string CategoryName { get; set; }
 
-        [StringLength(500, ErrorMessage = "Category Desctipyion can containt utmost 500 characters")]
+        [StringLength(500, ErrorMessage = "Category Description can containt utmost 500 characters")]
         public string CategoryDescription { get; set; }
 
         public int? BaseCategoryId { get; set; }
