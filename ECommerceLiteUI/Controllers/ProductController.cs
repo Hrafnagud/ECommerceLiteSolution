@@ -90,23 +90,23 @@ namespace ECommerceLiteUI.Controllers
                                 item.SaveAs(filePath);
                                 if (counter == 1)
                                 {
-                                    productPicture.ProductPicture1 = $"~/ProductPictures/{filename}/{model.ProductCode}/" +filename + counter + "-" + guid + extName;
+                                    productPicture.ProductPicture1 = $"/ProductPictures/{filename}/{model.ProductCode}/" +filename + counter + "-" + guid + extName;
                                 }
                                 else if (counter == 2)
                                 {
-                                    productPicture.ProductPicture2 = $"~/ProductPictures/{filename}/{model.ProductCode}/" +filename + counter + "-" + guid + extName;
+                                    productPicture.ProductPicture2 = $"/ProductPictures/{filename}/{model.ProductCode}/" +filename + counter + "-" + guid + extName;
                                 }
                                 else if (counter == 3)
                                 {
-                                    productPicture.ProductPicture3 = $"~/ProductPictures/{filename}/{model.ProductCode}/" +filename + counter + "-" + guid + extName;
+                                    productPicture.ProductPicture3 = $"/ProductPictures/{filename}/{model.ProductCode}/" +filename + counter + "-" + guid + extName;
                                 }
                                 else if (counter == 4)
                                 {
-                                    productPicture.ProductPicture4 = $"~/ProductPictures/{filename}/{model.ProductCode}/"+filename + counter + "-" + guid + extName;
+                                    productPicture.ProductPicture4 = $"/ProductPictures/{filename}/{model.ProductCode}/"+filename + counter + "-" + guid + extName;
                                 }
                                 else if (counter == 5)
                                 {
-                                    productPicture.ProductPicture5 = $"~/ProductPictures/{filename}/{model.ProductCode}/" +filename + counter + "-" + guid + extName;
+                                    productPicture.ProductPicture5 = $"/ProductPictures/{filename}/{model.ProductCode}/" +filename + counter + "-" + guid + extName;
                                 }
                             }
                             counter++;

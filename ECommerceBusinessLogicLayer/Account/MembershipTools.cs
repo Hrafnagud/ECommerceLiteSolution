@@ -60,5 +60,22 @@ namespace ECommerceBusinessLogicLayer.Account
                 return fullName;
             }
         }
+
+        public static ApplicationUser GetUser()
+        {
+            var id = HttpContext.Current.User.Identity.GetUserId();
+            if (string.IsNullOrEmpty(id))
+            {
+                return null;
+            }
+            else
+            {
+                var userManager = NewUserManager();
+                var user = userManager.FindById(id);
+                return user;
+
+            }
+        }
+
     }
 }
