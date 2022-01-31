@@ -5,6 +5,12 @@
     Layout = "~/Views/Shared/_LayoutUser.cshtml";
 }
 
+@if (!string.IsNullOrEmpty(TempData["AddToCart"] as String))
+{
+    <div class="alert alert-success" role="alert">
+        @TempData["AddToCart"]
+    </div>
+}
 <!-- section title -->
 <div class="col-md-12">
     <div class="section-title">
@@ -74,7 +80,8 @@
                                 </div>
                             </div>
                             <div class="add-to-cart">
-                                <button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>
+                                @*<button class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i> add to cart</button>*@
+                                <a href="/Home/AddToCart/@item.Id" class="add-to-cart-btn"><i class="fa fa-shopping-cart"></i>Add To Cart</a>
                             </div>
                         </div>
                         <!-- /product -->

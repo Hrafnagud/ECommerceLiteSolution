@@ -47,5 +47,45 @@ namespace ECommerceLiteUI.Controllers
 
             return View();
         }
+
+        public ActionResult AddToCart(int id)
+        {
+            try
+            {
+                var shoppingCart = Session["ShoppingCart"] as List<CartViewModel>;
+                if (shoppingCart == null)
+                {
+                    shoppingCart = new List<CartViewModel>();
+                }
+                if (id > 0)
+                {
+                    var product = productRepo.GetById(id);
+                    if (product == null)
+                    {
+                        TempData["AddToCart"] = "Product insertion has been failed. Please try again!";
+                        return RedirectToAction("Index", "Home");
+                    }
+                    var productAddToCart = product.Adapt<CartViewModel>();
+                    if (shoppingCart.Count(x => x.Id == productAddToCart.Id) > 0)
+                    {
+                        shoppingCart.FirstOrDefault(x => x.Id == productAddToCart.Id).Quantity++;
+                    }
+                    else
+                    {
+                        productAddToCart.Quantity = 1;
+                        shoppingCart.Add(productAddToCart);
+                    }
+                    Session["ShoppingCart"] = shoppingCart;
+                    TempData["AddToCart"] = "Product has been added.";
+                }
+
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                TempData["AddToCart"] = "Product insertion has been failed. Please try again!";
+                return RedirectToAction("Index", "Home");
+            }
+        }
     }
 }
