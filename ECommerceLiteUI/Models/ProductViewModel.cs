@@ -45,6 +45,29 @@ namespace ECommerceLiteUI.Models
             if (CategoryId > 0)
             {
                 CategoryOfProduct = categoryRepo.GetById(CategoryId);
+                if (CategoryOfProduct.BaseCategoryId > 0)
+                {
+                    CategoryOfProduct.CategoryList = new List<Category>();
+
+                    CategoryOfProduct.BaseCategory = categoryRepo.GetById(CategoryOfProduct.BaseCategoryId.Value);
+                    CategoryOfProduct.CategoryList.Add(CategoryOfProduct.BaseCategory);
+                    bool isOver = false;
+                    Category theBaseCategory = CategoryOfProduct.BaseCategory;
+                    while (!isOver)
+                    {
+
+                        if (theBaseCategory.BaseCategoryId > 0)
+                        {
+                            CategoryOfProduct.CategoryList.Add(categoryRepo.GetById(theBaseCategory.BaseCategoryId.Value));
+                            theBaseCategory = categoryRepo.GetById(theBaseCategory.BaseCategoryId.Value);
+                        }
+                        else
+                        {
+                            isOver = true;
+                        }
+                    }
+                    CategoryOfProduct.CategoryList = CategoryOfProduct.CategoryList.OrderBy(x => x.Id).ToList();
+                }
             }
         }
 
