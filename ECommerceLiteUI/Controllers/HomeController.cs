@@ -8,10 +8,15 @@ using Mapster;
 using ECommerceLiteUI.Models;
 using ECommerceLiteEntity.Models;
 using ECommerceBusinessLogicLayer.Account;
+using QRCoder;
+using System.Drawing;
+using ECommerceLiteEntity.ViewModels;
+using ECommerceBusinessLogicLayer.Settings;
+using System.Threading.Tasks;
 
 namespace ECommerceLiteUI.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         CategoryRepo categoryRepo = new CategoryRepo();
         ProductRepo productRepo = new ProductRepo();
@@ -23,7 +28,7 @@ namespace ECommerceLiteUI.Controllers
         {
             var categoryList = categoryRepo.Queryable().Where(x => x.BaseCategoryId == null).ToList();
             ViewBag.CategoryList = categoryList;
-            var productList = productRepo.GetAll();
+            var productList = productRepo.Queryable().Where(x => x.Quantity >= 1).ToList();
             List<ProductViewModel> model = new List<ProductViewModel>();
             foreach (var item in productList)
             {
@@ -93,7 +98,7 @@ namespace ECommerceLiteUI.Controllers
         }
 
         [Authorize]
-        public ActionResult Buy()
+        public async Task<ActionResult> Buy()
         {
             try
             {
@@ -109,13 +114,14 @@ namespace ECommerceLiteUI.Controllers
                         {
                             CustomerTRID = customer.TRID,
                             RegisterDate = DateTime.Now,
-                            OrderNumber = "12345678"
+                            OrderNumber = "1234567"
                         };
 
                         int orderInsertResult = orderRepo.Insert(newOrder);
 
                         if (orderInsertResult > 0)
                         {
+                            bool isSuccess = false;
                             foreach (var item in shoppingCart)
                             {
                                 OrderDetail newOrderDetail = new OrderDetail()
@@ -133,13 +139,53 @@ namespace ECommerceLiteUI.Controllers
                                 }
                                 else
                                 {
-                                    newOrderDetail.TotalPrice = newOrderDetail.Quantity * newOrderDetail.TotalPrice;
+                                    newOrderDetail.TotalPrice = newOrderDetail.Quantity * newOrderDetail.ProductPrice;
                                 }
                                 int detailInsertResult = orderDetailRepo.Insert(newOrderDetail);
                                 if (detailInsertResult > 0)
                                 {
-                                    return RedirectToAction("Order", "Home", new { id = newOrder.Id });
+                                    isSuccess = true;
                                 }
+                            }
+                            if (isSuccess)
+                            {
+                                //QR Email
+                                #region SendEmail
+
+                                QRCodeGenerator QRGenerator = new QRCodeGenerator();
+                                QRCodeData QRData = QRGenerator.CreateQrCode(newOrder.OrderNumber, QRCodeGenerator.ECCLevel.Q);
+                                QRCode QRCode = new QRCode(QRData);
+                                Bitmap QRBitmap = QRCode.GetGraphic(60);
+                                byte[] bitmapArray = BitmapToByteArray(QRBitmap);
+                                string QRUri = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(bitmapArray));
+
+                                List<OrderDetail> orderDetailList = new List<OrderDetail>();
+                                orderDetailList = orderDetailRepo.Queryable().Where(x => x.OrderId == newOrder.Id).ToList();
+
+                                string message = $"Merhaba {user.Name} {user.Surname} <br/>" +
+                                                   $"{orderDetailList.Count} adet ürünlerinizin siparişini aldık.<br/>" +
+                                                   $"Toplam Tutar:{orderDetailList.Sum(x => x.TotalPrice).ToString()} ₺ <br/> <br/>" +
+                                                   $"<table><tr><th>Ürün Adı</th><th>Adet</th><th>Birim Fiyat</th><th>Toplam</th></tr>";
+                                foreach (var item in orderDetailList)
+                                {
+                                    message += $"<tr><td>{productRepo.GetById(item.ProductId).ProductName}</td><td>{item.Quantity}</td><td>{item.TotalPrice}</td></tr>";
+                                }
+                                message += "</table><br/>Siparişinize ait QR kodunuz: <br/>";
+                                message += $"<a href='/Home/Order/{newOrder.Id}'><img src=\"{QRUri}\" height=250px;  width=250px; class='img-thumbnail' /></a>";
+                                await SiteSettings.SendMail(new MailModel()
+                                {
+                                    To = user.Email,
+                                    Subject = "ECommerceLite - Siparişiniz alındı",
+                                    Message = message
+
+                                });
+
+                                #endregion
+                                return RedirectToAction("Order", "Home", new { id = newOrder.Id });
+                            }
+                            else
+                            {
+                                //
                             }
                         }
                     }
@@ -154,14 +200,16 @@ namespace ECommerceLiteUI.Controllers
             }
         }
 
+
+
         [Authorize]
-        public ActionResult Order(int id)
+        public ActionResult Order(int? id)
         {
             try
             {
                 if (id > 0)
                 {
-                    Order customerOrder = orderRepo.GetById(id);
+                    Order customerOrder = orderRepo.GetById(id.Value);
                     List<OrderDetail> orderDetails = new List<OrderDetail>();
                     if (customerOrder != null)
                     {
@@ -171,6 +219,7 @@ namespace ECommerceLiteUI.Controllers
                             item.Product = productRepo.GetById(item.ProductId);
                         }
                         ViewBag.OrderSuccess = "Your order has been successfully created!";
+                        Session["ShoppingCart"] = null;
                         return View(orderDetails);
                     }
                     else
