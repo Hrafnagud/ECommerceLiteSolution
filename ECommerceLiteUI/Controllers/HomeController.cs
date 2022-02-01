@@ -6,6 +6,8 @@ using System.Web.Mvc;
 using ECommerceBusinessLogicLayer.Repository;
 using Mapster;
 using ECommerceLiteUI.Models;
+using ECommerceLiteEntity.Models;
+using ECommerceBusinessLogicLayer.Account;
 
 namespace ECommerceLiteUI.Controllers
 {
@@ -13,7 +15,9 @@ namespace ECommerceLiteUI.Controllers
     {
         CategoryRepo categoryRepo = new CategoryRepo();
         ProductRepo productRepo = new ProductRepo();
-
+        OrderRepo orderRepo = new OrderRepo();
+        OrderDetailRepo orderDetailRepo = new OrderDetailRepo();
+        CustomerRepo customerRepo = new CustomerRepo();
 
         public ActionResult Index()
         {
@@ -85,6 +89,106 @@ namespace ECommerceLiteUI.Controllers
             {
                 TempData["AddToCart"] = "Product insertion has been failed. Please try again!";
                 return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [Authorize]
+        public ActionResult Buy()
+        {
+            try
+            {
+                var shoppingCart = Session["ShoppingCart"] as List<CartViewModel>;
+                if (shoppingCart != null)
+                {
+                    if (shoppingCart.Count > 0)
+                    {
+                        var user = MembershipTools.GetUser();
+                        var customer = customerRepo.Queryable().FirstOrDefault(x => x.UserId == user.Id);
+
+                        Order newOrder = new Order()
+                        {
+                            CustomerTRID = customer.TRID,
+                            RegisterDate = DateTime.Now,
+                            OrderNumber = "12345678"
+                        };
+
+                        int orderInsertResult = orderRepo.Insert(newOrder);
+
+                        if (orderInsertResult > 0)
+                        {
+                            foreach (var item in shoppingCart)
+                            {
+                                OrderDetail newOrderDetail = new OrderDetail()
+                                {
+                                    OrderId = newOrder.Id,
+                                    ProductId = item.Id,
+                                    Discount = 0,
+                                    ProductPrice = item.Price,
+                                    Quantity = item.Quantity,
+                                    RegisterDate = DateTime.Now
+                                };
+                                if (newOrderDetail.Discount > 0)
+                                {
+                                    newOrderDetail.TotalPrice = newOrderDetail.Quantity * (newOrderDetail.ProductPrice - (newOrderDetail.ProductPrice * Convert.ToDecimal(newOrderDetail.Discount/100)));
+                                }
+                                else
+                                {
+                                    newOrderDetail.TotalPrice = newOrderDetail.Quantity * newOrderDetail.TotalPrice;
+                                }
+                                int detailInsertResult = orderDetailRepo.Insert(newOrderDetail);
+                                if (detailInsertResult > 0)
+                                {
+                                    return RedirectToAction("Order", "Home", new { id = newOrder.Id });
+                                }
+                            }
+                        }
+                    }
+                }
+                return RedirectToAction("Index", "Home");
+            }
+            catch (Exception ex)
+            {
+                //ex log
+                //Result will be redirected to Homepage via TempData 
+                return RedirectToAction("Index", "Home");
+            }
+        }
+
+        [Authorize]
+        public ActionResult Order(int id)
+        {
+            try
+            {
+                if (id > 0)
+                {
+                    Order customerOrder = orderRepo.GetById(id);
+                    List<OrderDetail> orderDetails = new List<OrderDetail>();
+                    if (customerOrder != null)
+                    {
+                        orderDetails = orderDetailRepo.Queryable().Where(x => x.OrderId == customerOrder.Id).ToList();
+                        foreach (var item in orderDetails)
+                        {
+                            item.Product = productRepo.GetById(item.ProductId);
+                        }
+                        ViewBag.OrderSuccess = "Your order has been successfully created!";
+                        return View(orderDetails);
+                    }
+                    else
+                    {
+                        ModelState.AddModelError("", "Product not found! Try again.");
+                        return View(orderDetails);
+                    }
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Product not found! Try again.");
+                    return View(new List<OrderDetail>());
+                }
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Unexpected error has occured!");
+                return View(new List<OrderDetail>());
             }
         }
     }

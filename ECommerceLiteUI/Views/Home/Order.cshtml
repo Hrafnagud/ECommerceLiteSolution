@@ -1,0 +1,57 @@
+﻿@using ECommerceLiteEntity.Models
+@model List<OrderDetail>
+
+@{
+    ViewBag.Title = "Order";
+    Layout = "~/Views/Shared/_LayoutUser.cshtml";
+}
+
+<div class="col-md-12">
+    @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+</div>
+
+@if (!string.IsNullOrEmpty(ViewBag.OrderSuccess))
+{
+    <div class="alert alert-success" role="alert">
+        @ViewBag.OrderSuccess
+    </div>
+}
+
+<div class="col-12">
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Order Date</th>
+                        <th>Price</th>
+                        <th>Discount</th>
+                        <th>Total Price</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>@item.Product.ProductName</td>
+                            <td>@item.RegisterDate.ToString("dd.MMMM.yyyy")</td>
+                            <td>@item.ProductPrice ₺</td>
+                            <td>@item.Discount</td>
+                            <td>@item.TotalPrice ₺</td>
+                            <td>
+                                <a href="/Product/Edit/@item.Id" class="btn btn-sm btn-warning" style=" margin-right:5px;">Edit</a>
+                                <a href="/Product/Delete/@item.Id" class="btn btn-sm btn-danger" style=" margin-right:5px;">Delete</a>
+
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+            <hr />
+            <a href="/Category/CategoryList" class="btn btn-secondary" style=" margin-right:5px;">Back to Category</a>
+        </div>
+    </div>
+</div>
+    
