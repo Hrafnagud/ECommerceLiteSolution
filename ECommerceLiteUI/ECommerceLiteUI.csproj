@@ -2384,6 +2384,8 @@
     <Content Include="Views\Shared\_PartialUserFullNameOnHomePage.cshtml" />
     <Content Include="Views\Shared\_PartialShoppingCart.cshtml" />
     <Content Include="Views\Home\Order.cshtml" />
+    <Content Include="Views\Shared\_PartialAdminSideBarCategories.cshtml" />
+    <Content Include="Views\Product\CategoryProducts.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,4 +1,5 @@
 ﻿using ECommerceBusinessLogicLayer.Account;
+using ECommerceBusinessLogicLayer.Repository;
 using ECommerceLiteEntity.IdentityModels;
 using ECommerceLiteUI.Models;
 using System;
@@ -11,6 +12,9 @@ namespace ECommerceLiteUI.Controllers
 {
     public class PartialsController : BaseController
     {
+
+        CategoryRepo categoryRepo = new CategoryRepo();
+
         public PartialViewResult AdminSideBarResult()
         {
             //TODO: fullname will be received
@@ -44,6 +48,12 @@ namespace ECommerceLiteUI.Controllers
             {
                 return PartialView("_PartialShoppingCart", shoppingCart);
             }
+        }
+
+        public ActionResult AdminSideBarCategories()
+        {
+            TempData["AllCategoriesCount"] = categoryRepo.Queryable().Where(x => x.BaseCategory == null).ToList().Count;
+            return PartialView("_PartialAdminSideBarCategories");
         }
     }
 }
