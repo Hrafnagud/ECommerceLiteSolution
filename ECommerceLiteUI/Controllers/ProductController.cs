@@ -9,6 +9,7 @@ using ECommerceLiteUI.Models;
 using Mapster;
 using ECommerceBusinessLogicLayer.Settings;
 using System.IO;
+using PagedList;
 
 namespace ECommerceLiteUI.Controllers
 {
