@@ -59,8 +59,8 @@ namespace ECommerceLiteUI.Controllers
 
         public ActionResult AdminSideBarProducts()
         {
-            TempData["AllProductsCount"] = productRepo.GetAll().ToList().Count;
-            return PartialView("_PartialAdminSideBarProducts");
+            TempData["AllProductsCount"] = productRepo.GetAll().ToList().Count; //Product counts will be obtained.
+            return PartialView("_PartialAdminSideBarProducts");     //Create new partial view under View => Shared with the same name partial view
         }
     }
 }
