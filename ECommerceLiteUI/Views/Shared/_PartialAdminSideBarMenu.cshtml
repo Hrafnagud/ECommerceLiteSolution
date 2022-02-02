@@ -17,7 +17,7 @@
             Html.RenderAction("AdminSideBarCategories", "Partials");
         }
 
-        <li class="nav-item has-treeview">
+        @*<li class="nav-item has-treeview">
             <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-copy"></i>
                 <p>
@@ -34,7 +34,10 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li>*@
+        @{ 
+            Html.RenderAction("AdminSideBarProducts", "Partials");
+        }
         <li class="nav-item has-treeview">
             <a href="#" class="nav-link">
                 <i class="nav-icon fas fa-chart-pie"></i>
