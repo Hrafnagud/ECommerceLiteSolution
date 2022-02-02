@@ -135,7 +135,7 @@ namespace ECommerceLiteUI.Controllers
                                 };
                                 if (newOrderDetail.Discount > 0)
                                 {
-                                    newOrderDetail.TotalPrice = newOrderDetail.Quantity * (newOrderDetail.ProductPrice - (newOrderDetail.ProductPrice * Convert.ToDecimal(newOrderDetail.Discount/100)));
+                                    newOrderDetail.TotalPrice = newOrderDetail.Quantity * (newOrderDetail.ProductPrice - (newOrderDetail.ProductPrice * Convert.ToDecimal(newOrderDetail.Discount / 100)));
                                 }
                                 else
                                 {
@@ -163,19 +163,20 @@ namespace ECommerceLiteUI.Controllers
                                 orderDetailList = orderDetailRepo.Queryable().Where(x => x.OrderId == newOrder.Id).ToList();
 
                                 string message = $"Merhaba {user.Name} {user.Surname} <br/>" +
-                                                   $"{orderDetailList.Count} adet ürünlerinizin siparişini aldık.<br/>" +
-                                                   $"Toplam Tutar:{orderDetailList.Sum(x => x.TotalPrice).ToString()} ₺ <br/> <br/>" +
-                                                   $"<table><tr><th>Ürün Adı</th><th>Adet</th><th>Birim Fiyat</th><th>Toplam</th></tr>";
+                                                   $"{orderDetailList.Count} number of product(s).<br/>" +
+                                                   $"Total Price:{orderDetailList.Sum(x => x.TotalPrice).ToString()} ₺ <br/> <br/>" +
+                                                   $"<table><tr><th>Product Name</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr>";
                                 foreach (var item in orderDetailList)
                                 {
                                     message += $"<tr><td>{productRepo.GetById(item.ProductId).ProductName}</td><td>{item.Quantity}</td><td>{item.TotalPrice}</td></tr>";
                                 }
-                                message += "</table><br/>Siparişinize ait QR kodunuz: <br/>";
+                                string siteUrl =Request.Url.Scheme + Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port);
+                                message += "</table><br/>QR Code associated with your order: <br/>";
                                 message += $"<a href='/Home/Order/{newOrder.Id}'><img src=\"{QRUri}\" height=250px;  width=250px; class='img-thumbnail' /></a>";
                                 await SiteSettings.SendMail(new MailModel()
                                 {
                                     To = user.Email,
-                                    Subject = "ECommerceLite - Siparişiniz alındı",
+                                    Subject = "ECommerceLite - Your order has been successfully received.",
                                     Message = message
 
                                 });
@@ -200,17 +201,16 @@ namespace ECommerceLiteUI.Controllers
             }
         }
 
-
-
         [Authorize]
         public ActionResult Order(int? id)
         {
             try
             {
+                List<OrderDetail> orderDetails = new List<OrderDetail>();
+
                 if (id > 0)
                 {
                     Order customerOrder = orderRepo.GetById(id.Value);
-                    List<OrderDetail> orderDetails = new List<OrderDetail>();
                     if (customerOrder != null)
                     {
                         orderDetails = orderDetailRepo.Queryable().Where(x => x.OrderId == customerOrder.Id).ToList();
@@ -230,8 +230,20 @@ namespace ECommerceLiteUI.Controllers
                 }
                 else
                 {
-                    ModelState.AddModelError("", "Product not found! Try again.");
-                    return View(new List<OrderDetail>());
+                    //find logged in user
+                    var user = MembershipTools.GetUser();
+                    //customer
+                    var customer = customerRepo.Queryable().FirstOrDefault(x => x.UserId == user.Id);
+                    //Find orders with customer which has their unique id
+                    var orderList = orderRepo.Queryable().Where(x => x.CustomerTRID == customer.TRID).ToList(); //Extract data list from db
+                    orderList = orderList.Where(x => x.RegisterDate >= DateTime.Now.AddMonths(-1)).ToList();    //perform linq operation on c# list
+                    //order details will be extracted.
+                    foreach (var item in orderList)
+                    {
+                        var detailList = orderDetailRepo.Queryable().Where(x => x.OrderId == item.Id).ToList();
+                        orderDetails.AddRange(detailList);
+                    }
+                    return View(orderDetails.OrderByDescending(x => x.RegisterDate).ToList());
                 }
             }
             catch (Exception ex)
