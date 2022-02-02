@@ -20,10 +20,18 @@ namespace ECommerceLiteUI.Controllers
         CategoryRepo categoryRepo = new CategoryRepo();
         ProductPictureRepo productPictureRepo = new ProductPictureRepo();
 
-        public ActionResult ProductList()
+        public ActionResult ProductList(int page = 1, string search="")
         {
-            var allProductList = productRepo.GetAll();
-            return View(allProductList);
+            List<Product> allProductList = new List<Product>();
+            if (string.IsNullOrEmpty(search))
+            {
+                allProductList = productRepo.GetAll();
+            }
+            else
+            {
+                allProductList = productRepo.Queryable().Where(x => x.ProductName.Contains(search)).ToList();
+            }
+            return View(allProductList.ToPagedList(page, 3));
         }
 
 

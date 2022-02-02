@@ -216,7 +216,7 @@ namespace ECommerceLiteUI.Controllers
                 }, userIdentity);
                 if (user.Roles.FirstOrDefault().RoleId == roleManager.FindByName(Enum.GetName(typeof(IdentityRoles), IdentityRoles.Admin)).Id)
                 {
-                    return RedirectToAction("Index", "Admin");
+                    return RedirectToAction("Dashboard", "Admin");
 
                 }
                 if (user.Roles.FirstOrDefault().RoleId == roleManager.FindByName(Enum.GetName(typeof(IdentityRoles), IdentityRoles.Customer)).Id)

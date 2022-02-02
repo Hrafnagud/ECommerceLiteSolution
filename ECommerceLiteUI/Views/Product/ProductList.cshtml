@@ -1,12 +1,23 @@
 ﻿@using ECommerceLiteEntity.Models;
-@model List<Product>
+@using PagedList
+@using PagedList.Mvc
+@model PagedList.IPagedList<Product>
 @{
     ViewBag.Title = "ProductList";
     Layout = "~/Views/Shared/_LayoutAdmin.cshtml";
 }
 
 <h2>ProductList</h2>
-
+<br />
+<div class="col-md-12">
+    @using (Html.BeginForm("ProductList", "Product", FormMethod.Get))
+    {
+        <p>
+            Product Name: @Html.TextBox("search")
+            <input type="submit" value="Search" class="btn btn-info btn-sm"/>
+        </p>
+    }
+</div>
 <div class="col-12">
     <div class="card">
         <div class="card-header">
@@ -45,7 +56,9 @@
                     }
                 </tbody>
             </table>
-            <hr />
+            <div class="center" >
+                @Html.PagedListPager((IPagedList)Model, page => Url.Action("ProductList", "Product", new { page }))
+            </div>
             <a href="/Category/CategoryList" class="btn btn-secondary" style=" margin-right:5px;">Back to Category</a>
         </div>
     </div>
