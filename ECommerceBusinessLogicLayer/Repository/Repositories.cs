@@ -18,14 +18,14 @@ namespace ECommerceBusinessLogicLayer.Repository
         {
             List<ProductCountModel> list = new List<ProductCountModel>();
             dbContext = new ECommerceDataAccessLayer.MyContext();
-            var categoryList = from c in dbContext.Categories
-                               where c.BaseCategoryId == null
-                               select c;
+            var categoryList = this.Queryable()
+                .Where(x => x.BaseCategoryId == null).ToList();
             foreach (var item in categoryList)
             {
-                var subCategoryList = from c in dbContext.Categories
-                                      where c.BaseCategoryId == item.Id
-                                      select c;
+                //sub categoryleri
+                var subCategoryList = this.Queryable()
+                .Where(x => x.BaseCategoryId == item.Id).ToList();
+
                 int productCount = 0;
                 foreach (var subitem in subCategoryList)
                 {
@@ -34,11 +34,13 @@ namespace ECommerceBusinessLogicLayer.Repository
                                       select p;
                     productCount += productList.ToList().Count;
                 }
-                list.Add(new ProductCountModel() {
+                list.Add(new ProductCountModel()
+                {
                     BaseCategory = item,
                     ProductCount = productCount
                 });
             }
+
             return list;
         }
 
