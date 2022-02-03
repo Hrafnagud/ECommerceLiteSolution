@@ -38,13 +38,13 @@ namespace ECommerceLiteUI.Controllers
         [HttpGet]
         public ActionResult Create()
         {
-            List<SelectListItem> allCategories = new List<SelectListItem>();
-            categoryRepo.GetAll().ToList().ForEach(x => allCategories.Add(new SelectListItem()
+            List<SelectListItem> subCategories = new List<SelectListItem>();
+            categoryRepo.Queryable().Where(x => x.BaseCategoryId != null).ToList().ForEach(x => subCategories.Add(new SelectListItem()
             {
                 Text = x.CategoryName,
                 Value = x.Id.ToString()
             }));
-            ViewBag.CategoryList= allCategories;
+            ViewBag.CategoryList= subCategories;
             return View();
         }
 
@@ -54,13 +54,13 @@ namespace ECommerceLiteUI.Controllers
         {
             try
             {
-                List<SelectListItem> allCategories = new List<SelectListItem>();
-                categoryRepo.GetAll().ToList().ForEach(x => allCategories.Add(new SelectListItem()
+                List<SelectListItem> subCategories = new List<SelectListItem>();
+                categoryRepo.Queryable().Where(x => x.BaseCategoryId != null).ToList().ForEach(x => subCategories.Add(new SelectListItem()
                 {
                     Text = x.CategoryName,
                     Value = x.Id.ToString()
                 }));
-                ViewBag.CategoryList = allCategories;
+                ViewBag.CategoryList = subCategories;
 
                 if (!ModelState.IsValid)
                 {

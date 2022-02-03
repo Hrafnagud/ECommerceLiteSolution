@@ -18,6 +18,7 @@
         </p>
     }
 </div>
+
 <div class="col-12">
     <div class="card">
         <div class="card-header">
@@ -40,7 +41,11 @@
                     @foreach (var item in Model)
                     {
                         <tr>
-                            <td>@item.ProductName</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="ProductBtnClicked(@item.Id)" data-toggle="modal" data-target="#myModal">
+                                    @item.ProductName
+                                </button>
+                            </td>
                             <td>@item.RegisterDate.ToString("dd.MMMM.yyyy")</td>
                             <td>@item.Description</td>
                             <td>@item.Category.CategoryName</td>
@@ -63,3 +68,51 @@
         </div>
     </div>
 </div>
+
+<!--Modal Starts-->
+<div class="modal fade col-md-12" id="myModal" role="dialog">
+    <div class="modal-dialog">
+        <!--Modal Content Starts-->
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">Product Details</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div id="form-modal" class="modal-body">
+                @using (Html.BeginForm("Edit", "Product", FormMethod.Post, new { @class = "form-horizontal" }))
+                {
+                    <input type="hidden" name="Id" id="ProductId" class="form-control"/>
+                    <div class="col-md-12">
+                        @Html.ValidationSummary(false, "", new { @class = "text-danger" })
+                        <div class="form-group">
+                            @Html.Label("Product Name")
+                            <input id="ProductName" name="ProductName" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Product Description")
+                            <input id="Description" name="Description" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Product Code")
+                            <input id="ProductCode" name="ProductCode" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Quantity")
+                            <input id="Quantity" name="Quantity" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            @Html.Label("Price")
+                            <input id="Price" name="Price" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <input type="button" value="CLOSE" class="btn btn-danger" style="float:left" data-dismiss="modal" />
+                            <input type="submit" value="SAVE" class="btn btn-info" style="float:right" data-dismiss="modal" />
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+        <!--Modal Content Ends-->
+    </div>
+</div>
+<!--Modal Ends-->

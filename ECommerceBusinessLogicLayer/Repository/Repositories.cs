@@ -1,5 +1,6 @@
 ﻿using ECommerceLiteEntity.Models;
 using ECommerceLiteEntity.ViewModels;
+using Mapster;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,11 +23,18 @@ namespace ECommerceBusinessLogicLayer.Repository
                 .Where(x => x.BaseCategoryId == null).ToList();
             foreach (var item in categoryList)
             {
+                int productCount = 0;
+
+                //-- If client permits to add products for base categories, following line would do the trick.
+                var baseCategoryProductList = from p in dbContext.Products
+                                              where p.CategoryId == item.Id
+                                              select p;
+                productCount = baseCategoryProductList.ToList().Count;
+                //--
                 //sub categoryleri
                 var subCategoryList = this.Queryable()
                 .Where(x => x.BaseCategoryId == item.Id).ToList();
 
-                int productCount = 0;
                 foreach (var subitem in subCategoryList)
                 {
                     var productList = from p in dbContext.Products
@@ -36,7 +44,8 @@ namespace ECommerceBusinessLogicLayer.Repository
                 }
                 list.Add(new ProductCountModel()
                 {
-                    BaseCategory = item,
+                    BaseCategory = item.Adapt<CategoryViewModel>(),
+                    BaseCategoryName = item.CategoryName,
                     ProductCount = productCount
                 });
             }
