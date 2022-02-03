@@ -51,15 +51,15 @@ namespace ECommerceLiteUI.Controllers
             }
         }
 
-        public ActionResult AdminSideBarCategories()
+        public PartialViewResult AdminSideBarCategories()
         {
             TempData["AllCategoriesCount"] = categoryRepo.Queryable().Where(x => x.BaseCategory == null).ToList().Count;
             return PartialView("_PartialAdminSideBarCategories");
         }
 
-        public ActionResult AdminSideBarProducts()
+        public PartialViewResult AdminSideBarProducts()
         {
-            TempData["AllProductsCount"] = productRepo.GetAll().ToList().Count; //Product counts will be obtained.
+            TempData["AllProductsCount"] = productRepo.GetAll().Count; //Product counts will be obtained.
             return PartialView("_PartialAdminSideBarProducts");     //Create new partial view under View => Shared with the same name partial view
         }
     }
