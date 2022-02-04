@@ -28,7 +28,7 @@ namespace ECommerceLiteUI.Controllers
         {
             var categoryList = categoryRepo.Queryable().Where(x => x.BaseCategoryId == null).ToList();
             ViewBag.CategoryList = categoryList;
-            var productList = productRepo.Queryable().Where(x => x.Quantity >= 1).ToList();
+            var productList = productRepo.GetAll();
             List<ProductViewModel> model = new List<ProductViewModel>();
             foreach (var item in productList)
             {
