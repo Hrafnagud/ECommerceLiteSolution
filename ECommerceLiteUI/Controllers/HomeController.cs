@@ -98,7 +98,7 @@ namespace ECommerceLiteUI.Controllers
         }
 
         [Authorize]
-        public async Task<ActionResult> Buy()
+        public ActionResult Buy()
         {
             try
             {
@@ -151,36 +151,30 @@ namespace ECommerceLiteUI.Controllers
                             {
                                 //QR Email
                                 #region SendEmail
-
+                                string siteUrl = Request.Url.Scheme + Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port);
+                                siteUrl += "/Home/Order/" + newOrder.Id;
                                 QRCodeGenerator QRGenerator = new QRCodeGenerator();
-                                QRCodeData QRData = QRGenerator.CreateQrCode(newOrder.OrderNumber, QRCodeGenerator.ECCLevel.Q);
+                                QRCodeData QRData = QRGenerator.CreateQrCode(siteUrl, QRCodeGenerator.ECCLevel.Q);
                                 QRCode QRCode = new QRCode(QRData);
                                 Bitmap QRBitmap = QRCode.GetGraphic(60);
                                 byte[] bitmapArray = BitmapToByteArray(QRBitmap);
-                                string QRUri = string.Format("data:image/png;base64,{0}", Convert.ToBase64String(bitmapArray));
-
                                 List<OrderDetail> orderDetailList = new List<OrderDetail>();
                                 orderDetailList = orderDetailRepo.Queryable().Where(x => x.OrderId == newOrder.Id).ToList();
-
-                                string message = $"Merhaba {user.Name} {user.Surname} <br/>" +
-                                                   $"{orderDetailList.Count} number of product(s).<br/>" +
-                                                   $"Total Price:{orderDetailList.Sum(x => x.TotalPrice).ToString()} ₺ <br/> <br/>" +
-                                                   $"<table><tr><th>Product Name</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr>";
+                                string message = $"Hello {user.Name} {user.Surname} <br/><br/>" + $"{orderDetailList.Count} number of product(s) has been received by us.<br/><br/>" + $"Total Price {orderDetailList.Sum(x => x.TotalPrice).ToString()} ₺ <br/> <br/>" +$"<table><tr><th>Product Name</th><th>Quantity</th><th>Unit Price</th><th>Total</th></tr>";
                                 foreach (var item in orderDetailList)
                                 {
                                     message += $"<tr><td>{productRepo.GetById(item.ProductId).ProductName}</td><td>{item.Quantity}</td><td>{item.TotalPrice}</td></tr>";
                                 }
-                                string siteUrl =Request.Url.Scheme + Uri.SchemeDelimiter + Request.Url.Host + (Request.Url.IsDefaultPort ? "" : ":" + Request.Url.Port);
-                                message += "</table><br/>QR Code associated with your order: <br/>";
-                                message += $"<a href='/Home/Order/{newOrder.Id}'><img src=\"{QRUri}\" height=250px;  width=250px; class='img-thumbnail' /></a>";
-                                await SiteSettings.SendMail(new MailModel()
+
+
+                                message += "</table><br/>QR Code associated with your order is below. <br/><br/>";
+
+                                SiteSettings.SendMail(bitmapArray, new MailModel()
                                 {
                                     To = user.Email,
-                                    Subject = "ECommerceLite - Your order has been successfully received.",
+                                    Subject = "EcommerceLite - Your Order has been received.",
                                     Message = message
-
                                 });
-
                                 #endregion
                                 return RedirectToAction("Order", "Home", new { id = newOrder.Id });
                             }
