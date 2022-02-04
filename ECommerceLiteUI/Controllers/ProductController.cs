@@ -10,6 +10,7 @@ using Mapster;
 using ECommerceBusinessLogicLayer.Settings;
 using System.IO;
 using PagedList;
+using ECommerceBusinessLogicLayer.Account;
 
 namespace ECommerceLiteUI.Controllers
 {
@@ -20,7 +21,7 @@ namespace ECommerceLiteUI.Controllers
         CategoryRepo categoryRepo = new CategoryRepo();
         ProductPictureRepo productPictureRepo = new ProductPictureRepo();
 
-        public ActionResult ProductList(int page = 1, string search="")
+        public ActionResult ProductList(int page = 1, string search="", bool isNew = false)
         {
             List<Product> allProductList = new List<Product>();
             if (string.IsNullOrEmpty(search))
@@ -31,6 +32,17 @@ namespace ECommerceLiteUI.Controllers
             {
                 allProductList = productRepo.Queryable().Where(x => x.ProductName.Contains(search)).ToList();
             }
+
+            if (isNew)
+            {
+                allProductList = productRepo.GetAll();
+                allProductList = allProductList.Where(x =>
+                x.RegisterDate >= DateTime.Now.AddDays(-1)).ToList();
+
+            }
+
+            var user = MembershipTools.GetFullName();
+            LogManager.LogMessage("Arrived!", userInfo: user, pageInfo: "/Product/ProductList");
             return View(allProductList.ToPagedList(page, 3));
         }
 

@@ -17,6 +17,15 @@ namespace ECommerceBusinessLogicLayer.Settings
             using (FileStream stream = new FileStream(filePath, FileMode.Append, FileAccess.Write))
             {
                 StreamWriter writer = new StreamWriter(stream);
+                string format = "{0}\t\t{1}\t\t{2}\t\t{3}";
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.AppendFormat(
+                    format, DateTime.Now.ToString("dd/MM/yyyy"),
+                    pageInfo, userInfo, message
+                );
+                writer.WriteLine(stringBuilder.ToString());
+                writer.Close();
+                writer = null;
             }
         }
     }

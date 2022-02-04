@@ -1,4 +1,5 @@
 ﻿using ECommerceBusinessLogicLayer.Account;
+using ECommerceBusinessLogicLayer.Settings;
 using ECommerceLiteEntity.Enums;
 using ECommerceLiteEntity.IdentityModels;
 using Microsoft.AspNet.Identity;
@@ -31,6 +32,7 @@ namespace ECommerceLiteUI
                         Name = role
                     });
             }
+            LogManager.LogMessage("*-*-*-*-*\tAPPLICATION INITIATED!\t*-*-*-*-*");
         }
     }
 }
