@@ -20,7 +20,7 @@ namespace ECommerceBusinessLogicLayer.Settings
                 string format = "{0}\t\t{1}\t\t{2}\t\t{3}";
                 StringBuilder stringBuilder = new StringBuilder();
                 stringBuilder.AppendFormat(
-                    format, DateTime.Now.ToString("dd/MM/yyyy"),
+                    format, DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss"),
                     pageInfo, userInfo, message
                 );
                 writer.WriteLine(stringBuilder.ToString());

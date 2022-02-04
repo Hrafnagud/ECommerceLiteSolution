@@ -159,7 +159,8 @@ namespace ECommerceLiteUI.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "Unexpected error has occured!");
-                //ex log
+                var user = MembershipTools.GetFullName();
+                LogManager.LogMessage(ex.ToString(), userInfo: user, pageInfo: "Product/Create");
                 return View(model);
             }
         }
@@ -173,7 +174,8 @@ namespace ECommerceLiteUI.Controllers
             }
             catch (Exception ex)
             {
-                //
+                var user = MembershipTools.GetFullName();
+                LogManager.LogMessage(ex.ToString(), userInfo: user, pageInfo: "Product/CategoryProduct");
                 return View();  //Tomorrow we will be modifying this section
             }
         }
@@ -208,7 +210,8 @@ namespace ECommerceLiteUI.Controllers
             }
             catch (Exception ex)
             {
-                //ex
+                var user = MembershipTools.GetFullName();
+                LogManager.LogMessage(ex.ToString(), userInfo: user, pageInfo: "Product/Edit");
                 return RedirectToAction("ProductList", "Product");  //Temp
 
             }

@@ -63,6 +63,11 @@ namespace ECommerceBusinessLogicLayer.Settings
             }
         }
 
+        public static void SendMail()
+        {
+
+        }
+
         public static string UrlFormatConverter(string name)
         {
             string result = name.ToLower()
