@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Mail;
+using System.Net.Mime;
 using System.Text;
 using System.Threading.Tasks;
 using ECommerceLiteEntity.ViewModels;
@@ -12,7 +13,7 @@ namespace ECommerceBusinessLogicLayer.Settings
     public static class SiteSettings
     {
         public static string SiteMail { get; set; } = "yazilim103@gmail.com";
-        public static string SiteMailPasssword { get; set; } = "betul103103";
+        public static string SiteMailPassword { get; set; } = "betul103103";
 
         public static string SiteMailSmtpHost = "smtp.gmail.com";
 
@@ -47,7 +48,7 @@ namespace ECommerceBusinessLogicLayer.Settings
                     var credential = new NetworkCredential()
                     {
                         UserName = SiteMail,
-                        Password = SiteMailPasssword
+                        Password = SiteMailPassword
                     };
 
                     smtp.Credentials = credential;
@@ -63,8 +64,59 @@ namespace ECommerceBusinessLogicLayer.Settings
             }
         }
 
-        public static void SendMail()
+        public static void SendMail(byte[] iconBytes, MailModel model)
         {
+            try
+            {
+                System.IO.MemoryStream iconBitmap = new System.IO.MemoryStream(iconBytes);
+                LinkedResource iconResource = new LinkedResource(iconBitmap, MediaTypeNames.Image.Jpeg);
+                iconResource.ContentId = "Icon";
+
+                string htmlBody = @"<html><head>";
+                htmlBody += @"<style>";
+                htmlBody += @"body{ font-family:'Calibri',sans-serif; }";
+                htmlBody += @"</style>";
+                htmlBody += @"</head><body>";
+                htmlBody += model.Message;
+                htmlBody += @"<img style='float:left' width='250px' height='250px' src='cid:" + iconResource.ContentId + @"'/>";
+                htmlBody += @"</body></html>";
+
+                var message = new MailMessage();
+                message.To.Add(new MailAddress(model.To));
+                message.From = new MailAddress(SiteMail);
+                message.Subject = model.Subject;
+                message.IsBodyHtml = true;
+                message.Body = htmlBody;
+                message.BodyEncoding = Encoding.UTF8;
+                if (!string.IsNullOrEmpty(model.Cc))
+                {
+                    message.CC.Add(new MailAddress(model.Cc));
+                }
+                if (!string.IsNullOrEmpty(model.Bcc))
+                {
+                    message.Bcc.Add(new MailAddress(model.Bcc));
+                }
+                var credential = new NetworkCredential()
+                {
+                    UserName = SiteMail,
+                    Password = SiteMailPassword
+                };
+
+                AlternateView alternativeView = AlternateView.CreateAlternateViewFromString(htmlBody, null, MediaTypeNames.Text.Html);
+                alternativeView.LinkedResources.Add(iconResource);
+                message.AlternateViews.Add(alternativeView);
+
+                SmtpClient client = new SmtpClient();
+                client.Credentials = credential;
+                client.Port = SiteMailSmtpPort; // You can use Port 25 if 587 is blocked
+                client.Host = SiteMailSmtpHost;
+                client.EnableSsl = SiteMailEnableSsl;
+                client.Send(message);
+            }
+            catch (Exception ex)
+            {
+                LogManager.LogMessage(ex.ToString(), pageInfo: "void SendMail", userInfo: model.To);
+            }
 
         }
 
