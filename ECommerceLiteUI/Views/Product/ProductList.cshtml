@@ -9,12 +9,25 @@
 
 <h2>ProductList</h2>
 <br />
+
+@{
+    if (!string.IsNullOrEmpty(TempData["ProductModalError"] as String))
+    {
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <strong>ATTENTION!</strong> You should check in on some of those fields below.
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    }
+}
+
 <div class="col-md-12">
     @using (Html.BeginForm("ProductList", "Product", FormMethod.Get))
     {
         <p>
             Product Name: @Html.TextBox("search")
-            <input type="submit" value="Search" class="btn btn-info btn-sm"/>
+            <input type="submit" value="Search" class="btn btn-info btn-sm" />
         </p>
     }
 </div>
@@ -61,7 +74,7 @@
                     }
                 </tbody>
             </table>
-            <div class="center" >
+            <div class="center">
                 @Html.PagedListPager((IPagedList)Model, page => Url.Action("ProductList", "Product", new { page }))
             </div>
             <a href="/Category/CategoryList" class="btn btn-secondary" style=" margin-right:5px;">Back to Category</a>
@@ -81,7 +94,7 @@
             <div id="form-modal" class="modal-body">
                 @using (Html.BeginForm("Edit", "Product", FormMethod.Post, new { @class = "form-horizontal" }))
                 {
-                    <input type="hidden" name="Id" id="ProductId" class="form-control"/>
+                    <input type="hidden" name="Id" id="ProductId" class="form-control" />
                     <div class="col-md-12">
                         @Html.AntiForgeryToken()
                         @Html.ValidationSummary(false, "", new { @class = "text-danger" })
@@ -94,6 +107,15 @@
                             <input id="Description" name="Description" class="form-control" />
                         </div>
                         <div class="form-group">
+                            <label for="CategoryId">ChooseCategory</label>
+                            <select class="form-control" id="category" name="CategoryId">
+                                @foreach (var item in ViewBag.CategoryList)
+                                {
+                                    <option value="@item.Value">@item.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="form-group">
                             @Html.Label("Product Code")
                             <input id="ProductCode" name="ProductCode" class="form-control" />
                         </div>
@@ -104,6 +126,11 @@
                         <div class="form-group">
                             @Html.Label("Price")
                             <input id="Price" name="Price" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="Files">Select a File</label>
+                            <input type="file" id="Files" name="Files" multiple />
                         </div>
                         <div class="form-group">
                             <input type="button" value="CLOSE" class="btn btn-danger" style="float:left" data-dismiss="modal" />
@@ -132,6 +159,7 @@
                         $('#Price').val(res.data.Price);
                         $('#Quantity').val(res.data.Quantity);
                         $('#ProductId').val(res.data.Id);
+                        $('#category').val(res.data.CategoryId);
                     }
                     else {
 
@@ -142,5 +170,5 @@
                 },
             });
         }
-    </script>    
+    </script>
 }
