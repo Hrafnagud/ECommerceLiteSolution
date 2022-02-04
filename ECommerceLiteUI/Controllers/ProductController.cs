@@ -96,7 +96,7 @@ namespace ECommerceLiteUI.Controllers
                 if (insertResult > 0)
                 {
                     //Product images will also be added.
-                    if (model.Files.Any())  //If anything selected as productImage there will be an image to add
+                    if (model.Files.Count(x=> x!=null)>0)  //If anything selected as productImage there will be an image to add
                     {
                         ProductPicture productPicture = new ProductPicture();
                         productPicture.ProductId = newProduct.Id;
@@ -207,77 +207,77 @@ namespace ECommerceLiteUI.Controllers
                 product.Quantity = model.Quantity;
                 product.Price = model.Price;
                 product.CategoryId = model.CategoryId;
-                //if (model.Files.Any())
-                //{
-                //    //Önce sildik
-                //    var pictureList =
-                //          productPictureRepo.Queryable()
-                //          .Where(x => x.ProductId == model.Id).ToList();
-                //    foreach (var item in pictureList)
-                //    {
-                //        productPictureRepo.Delete(item);
-                //    }
-                //    //sonra yeni eklediklerini oluşturacağız.
-                //    ProductPicture productPicture = new ProductPicture();
-                //    productPicture.ProductId = model.Id;
-                //    productPicture.RegisterDate = DateTime.Now;
-                //    int counter = 1;
-                //    foreach (var item in model.Files)
-                //    {
+                if (model.Files.Count(x => x != null) > 0)
+                {
+                    //Önce sildik
+                    var pictureList =
+                          productPictureRepo.Queryable()
+                          .Where(x => x.ProductId == model.Id).ToList();
+                    foreach (var item in pictureList)
+                    {
+                        productPictureRepo.Delete(item);
+                    }
+                    //sonra yeni eklediklerini oluşturacağız.
+                    ProductPicture productPicture = new ProductPicture();
+                    productPicture.ProductId = model.Id;
+                    productPicture.RegisterDate = DateTime.Now;
+                    int counter = 1;
+                    foreach (var item in model.Files)
+                    {
 
-                //        if (item != null && item.ContentType.Contains("image") && item.ContentLength > 0)
-                //        {
+                        if (item != null && item.ContentType.Contains("image") && item.ContentLength > 0)
+                        {
 
-                //            string filename = SiteSettings.UrlFormatConverter(model.ProductName).ToLower().Replace("-", "");
-                //            string extName = Path
-                //                .GetExtension(item.FileName);
+                            string filename = SiteSettings.UrlFormatConverter(model.ProductName).ToLower().Replace("-", "");
+                            string extName = Path
+                                .GetExtension(item.FileName);
 
-                //            string guid = Guid.NewGuid()
-                //                .ToString().Replace("-", "");
-                //            var directoryPath = Server.MapPath($"~/ProductPictures/{filename}/{model.ProductCode}");
-                //            var filePath = Server.MapPath($"~/ProductPictures/{filename}/{model.ProductCode}/") + filename + counter + "-" + guid + extName;
-                //            if (!Directory.Exists(directoryPath))
-                //            {
-                //                Directory.CreateDirectory(directoryPath);
-                //            }
-                //            item.SaveAs(filePath);
-                //            if (counter == 1)
-                //            {
-                //                productPicture.ProductPicture1 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
-                //            }
-                //            if (counter == 2)
-                //            {
-                //                productPicture.ProductPicture2 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
-                //            }
-                //            if (counter == 3)
-                //            {
-                //                productPicture.ProductPicture3 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
-                //            }
-                //            if (counter == 4)
-                //            {
-                //                productPicture.ProductPicture4 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
-                //            }
-                //            if (counter == 5)
-                //            {
-                //                productPicture.ProductPicture5 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
-                //            }
+                            string guid = Guid.NewGuid()
+                                .ToString().Replace("-", "");
+                            var directoryPath = Server.MapPath($"~/ProductPictures/{filename}/{model.ProductCode}");
+                            var filePath = Server.MapPath($"~/ProductPictures/{filename}/{model.ProductCode}/") + filename + counter + "-" + guid + extName;
+                            if (!Directory.Exists(directoryPath))
+                            {
+                                Directory.CreateDirectory(directoryPath);
+                            }
+                            item.SaveAs(filePath);
+                            if (counter == 1)
+                            {
+                                productPicture.ProductPicture1 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
+                            }
+                            if (counter == 2)
+                            {
+                                productPicture.ProductPicture2 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
+                            }
+                            if (counter == 3)
+                            {
+                                productPicture.ProductPicture3 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
+                            }
+                            if (counter == 4)
+                            {
+                                productPicture.ProductPicture4 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
+                            }
+                            if (counter == 5)
+                            {
+                                productPicture.ProductPicture5 = $"/ProductPictures/{filename}/{model.ProductCode}/" + filename + counter + "-" + guid + extName;
+                            }
 
 
-                //        }
-                //        counter++;
-                //    }
+                        }
+                        counter++;
+                    }
 
-                //    int pictureInsertResult =
-                //        productPictureRepo.Insert(productPicture);
-                //    if (pictureInsertResult == 0)
-                //    {
-                //        TempData["ProductModalError"] = "Ürün eklendi ama ürüne ait fotoğraflar eklenirken bir hata oluştu. Fotoğraf eklemek için tekrar deneyiniz!";
-                //    }
-                //    else
-                //    {
-                //        TempData["ProductModalError"] = string.Empty;
-                //    }
-                //}
+                    int pictureInsertResult =
+                        productPictureRepo.Insert(productPicture);
+                    if (pictureInsertResult == 0)
+                    {
+                        TempData["ProductModalError"] = "Ürün eklendi ama ürüne ait fotoğraflar eklenirken bir hata oluştu. Fotoğraf eklemek için tekrar deneyiniz!";
+                    }
+                    else
+                    {
+                        TempData["ProductModalError"] = string.Empty;
+                    }
+                }
 
                 int updateResult = productRepo.Update();
                 if (updateResult > 0)

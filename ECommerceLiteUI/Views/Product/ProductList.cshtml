@@ -92,7 +92,9 @@
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
             <div id="form-modal" class="modal-body">
-                @using (Html.BeginForm("Edit", "Product", FormMethod.Post, new { @class = "form-horizontal" }))
+                @using (Html.BeginForm("Edit", "Product", FormMethod.Post, new {
+                    enctype = "multipart/form-data",
+                    @class = "form-horizontal" }))
                 {
                     <input type="hidden" name="Id" id="ProductId" class="form-control" />
                     <div class="col-md-12">
