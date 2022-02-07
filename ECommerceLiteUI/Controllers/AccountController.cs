@@ -398,7 +398,7 @@ namespace ECommerceLiteUI.Controllers
         {
             Session.Clear();
             HttpContext.GetOwinContext().Authentication.SignOut();
-            return Redirect("/Admin/Dashboard");
+            return RedirectToAction("Login", "Account");
         }
     }
 }
